@@ -1,2 +1,2 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-SRC_URI += "file://snappy.cfg"
+SRC_URI += "file://snaps.cfg"
