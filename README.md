@@ -1,8 +1,8 @@
-OpenEmbedded/Yocto layer for Ubuntu Snappy support
+# Community maintained OpenEmbedded/Yocto layer for snap support
 ==================================================
 
-This meta layer adds support for Ubuntu Snappy for all OpenEmbedded/Yocto based
-devices.
+This meta layer adds support for snapd and snaps for all OpenEmbedded/Yocto
+based devices.
 
 This meta layer mainly contains the following components which are
 required for supporting snaps in your system:
@@ -49,10 +49,10 @@ Note that those layers may depend on additional layers you will need to add.
  $ git checkout dunfell
 ```
 
-5. Fetch meta-snappy layer
+5. Fetch meta-snapd layer
 
 ```
- $ git clone https://github.com/morphis/meta-snappy.git
+ $ git clone https://github.com/snapcore/meta-snapd.git
 ```
 
 6. Prepare the build environment
@@ -61,12 +61,12 @@ Note that those layers may depend on additional layers you will need to add.
  $ source oe-init-build-env
 ```
 
- Now add meta-snappy to your conf/bblayers.conf so that it looks similar to this
+ Now add meta-snapd to your conf/bblayers.conf so that it looks similar to this
 
 ```
  BBLAYERS ?= " \
    ...
-   /tmp/poky/meta-snappy \
+   /tmp/poky/meta-snapd \
    /tmp/meta-openembedded/meta-oe \
    /tmp/meta-openembedded/meta-filesystems \
    /tmp/meta-openembedded/meta-security \
@@ -118,7 +118,7 @@ INHERIT += "rm_work"
 RM_WORK_EXCLUDE += "snapd"
 ```
 
-8. Finally you can now build the Snappy demo image via
+8. Finally you can now build the demo image via
 
 ```
  $ bitbake snapd-demo-image
@@ -151,6 +151,6 @@ RM_WORK_EXCLUDE += "snapd"
 # Contributions & support
 
 Please submit any issues or pull requests on out github project at
-http://github.com/morphis/meta-snappy
+http://github.com/snapcore/meta-snapd
 
 Head out to https://forum.snapcraft.io/ for support and questions about snapd.

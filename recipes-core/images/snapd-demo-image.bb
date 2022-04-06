@@ -1,4 +1,4 @@
-SUMMARY = "A small demo image to demo Snappy running on OpenEmbedded/Yocto"
+SUMMARY = "A small demo image to demo snaps running on OpenEmbedded/Yocto"
 
 IMAGE_INSTALL = " \
     packagegroup-core-boot \
