@@ -3,6 +3,6 @@ PR = "r0"
 
 inherit packagegroup
 
-RDEPENDS:${PN} = " \
+RDEPENDS_${PN} = " \
   snapd \
 "
