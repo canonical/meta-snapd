@@ -3,8 +3,9 @@ HOMEPAGE = "https://www.snapcraft.io"
 LICENSE = "GPL-3.0"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/${PN}-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-SRC_URI = "									\
+SRC_URI = "	\
 	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
+  file://0001-mkversion-data-generate-supported-assert-formats-inf.patch \
 "
 
 SRC_URI[md5sum] = "5952bd537b14f74aa2c33ecba84e9d9a"
