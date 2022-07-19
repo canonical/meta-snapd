@@ -16,21 +16,6 @@ PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmo
 
 GO_IMPORT = "github.com/snapcore/snapd"
 
-SHARED_GO_INSTALL = "				\
-	${GO_IMPORT}/cmd/snap		\
-	${GO_IMPORT}/cmd/snapd		\
-	${GO_IMPORT}/cmd/snap-seccomp	\
-	${GO_IMPORT}/cmd/snap-failure	\
-	"
-
-STATIC_GO_INSTALL = " \
-	${GO_IMPORT}/cmd/snap-exec		\
-	${GO_IMPORT}/cmd/snap-update-ns		\
-	${GO_IMPORT}/cmd/snapctl		\
-"
-
-GO_INSTALL = "${SHARED_GO_INSTALL}"
-
 DEPENDS += "			\
 	glib-2.0		\
 	udev			\
@@ -68,6 +53,9 @@ AUTOTOOLS_SCRIPT_PATH = "${S}/cmd"
 
 SYSTEMD_SERVICE:${PN} = "snapd.service"
 
+GO_BUILD_TAGS_snapd = "nosecboot"
+GO_BUILD_TAGS = "nosecboot nomanagers"
+
 # The go class does export a do_configure function, of which we need
 # to change the symlink set-up, to target snapd's environment.
 do_configure() {
@@ -80,16 +68,22 @@ do_configure() {
 }
 
 do_compile() {
-	go_do_compile
-	# these *must* be built statically
-	for prog in ${STATIC_GO_INSTALL}; do
-		${GO} install -v \
-		        -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
-		        $prog
-	done
+	(
+		cd ${S}
+		${GO} install -tags '${GO_BUILD_TAGS_snapd}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snapd
+		${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap
+		${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap-seccomp
+		${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap-failure
 
-  # build the rest
-  autotools_do_compile
+		# these *must* be built statically
+		for prog in snap-exec snap-update-ns snapctl; do
+			${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor -v \
+			      -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
+			      github.com/snapcore/snapd/cmd/$prog
+		done
+	)
+	# build the rest
+	autotools_do_compile
 }
 
 do_install() {
