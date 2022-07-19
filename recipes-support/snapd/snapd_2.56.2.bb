@@ -7,8 +7,8 @@ SRC_URI = "									\
 	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
 "
 
-SRC_URI[md5sum] = "0869cf83542632cef3ad721058db890a"
-SRC_URI[sha256sum] = "1e8c9e7c37cb4099d7bc0e877362d4bef2cf8383e56e7431970b99b23a726493"
+SRC_URI[md5sum] = "5952bd537b14f74aa2c33ecba84e9d9a"
+SRC_URI[sha256sum] = "ee4096ef1a74a8d29b4cb7f43d442244beec413c21a517f34476270eb6a59fed"
 
 PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}"
 PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmor"
@@ -35,6 +35,7 @@ DEPENDS += "			\
 	udev			\
 	xfsprogs		\
 	libseccomp      \
+	${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}	\
 "
 
 RDEPENDS:${PN} += "		\
@@ -66,21 +67,18 @@ AUTOTOOLS_SCRIPT_PATH = "${S}/cmd"
 
 SYSTEMD_SERVICE:${PN} = "snapd.service"
 
-do_configure:prepend() {
-	(cd ${S} ; ./mkversion.sh ${PV})
-}
-
 # The go class does export a do_configure function, of which we need
 # to change the symlink set-up, to target snapd's environment.
 do_configure() {
 	mkdir -p ${S}/src/github.com/snapcore
 	ln -snf ${S} ${S}/src/${GO_IMPORT}
 	go_do_configure
+	# internally calls go run to generate some assets
+	(cd ${S} ; GOARCH=${GOHOSTARCH} sh -x ./mkversion.sh ${PV})
 	autotools_do_configure
 }
 
 do_compile() {
-	export GO111MODULE=off
 	go_do_compile
 	# these *must* be built statically
 	for prog in ${STATIC_GO_INSTALL}; do
@@ -140,11 +138,13 @@ do_install() {
 	rm -fv ${D}${systemd_unitdir}/system/snapd.system-shutdown.service
 	rm -fv ${D}${systemd_unitdir}/system/snapd.snap-repair.*
 	rm -fv ${D}${systemd_unitdir}/system/snapd.core-fixup.*
-	# and related scripts
+	rm -fv ${D}${systemd_unitdir}/snapd.recovery-chooser-trigger.service
+	# and related scripts and binaries
 	rm -fv ${D}${libdir}/snapd/snapd.core-fixup.sh
+	rm -fv ${D}${libdir}/snapd/system-shutdown
 }
 
-RDEPENDS:{PN} += "squashfs-tools"
+RDEPENDS:${PN} += "squashfs-tools"
 FILES:${PN} += "                                    \
 	${systemd_unitdir}/system/                        \
 	${systemd_unitdir}/system-generators/             \
