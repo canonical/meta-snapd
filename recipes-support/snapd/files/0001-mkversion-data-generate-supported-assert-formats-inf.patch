@@ -1,0 +1,41 @@
+From 69acd25ccd5ccd629cf2aaa6f5d8e0d83ce40df9 Mon Sep 17 00:00:00 2001
+Message-Id: <69acd25ccd5ccd629cf2aaa6f5d8e0d83ce40df9.1658223058.git.maciek.borzecki@gmail.com>
+From: Maciek Borzecki <maciek.borzecki@gmail.com>
+Date: Tue, 19 Jul 2022 11:29:11 +0200
+Subject: [PATCH] mkversion, data: generate supported assert formats info
+ upfront
+
+It is not always trivial to execute go run in a cross compilation environment
+such as Yocto. For this reason, generate asserts.info upfront on the host.
+
+Signed-off-by: Maciek Borzecki <maciek.borzecki@gmail.com>
+---
+ data/asserts.info | 1 +
+ mkversion.sh      | 6 +++++-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+ create mode 100644 data/asserts.info
+
+diff --git a/data/asserts.info b/data/asserts.info
+new file mode 100644
+index 0000000..02f324d
+--- /dev/null
++++ b/data/asserts.info
+@@ -0,0 +1 @@
++SNAPD_ASSERTS_FORMATS='{"snap-declaration":5,"system-user":1}'
+diff --git a/mkversion.sh b/mkversion.sh
+index d563ba2..20051db 100755
+--- a/mkversion.sh
++++ b/mkversion.sh
+@@ -137,7 +137,11 @@ if [ "$GO111MODULE" = "off" ] ; then
+ elif [ ! -d "$GO_GENERATE_BUILDDIR/vendor/github.com"  ] ; then
+     MOD=--
+ fi
+-fmts=$(cd "$GO_GENERATE_BUILDDIR" ; go run $MOD ./asserts/info)
++if [ ! -f ./data/asserts.info ]; then
++    fmts=$(cd "$GO_GENERATE_BUILDDIR" ; go run $MOD ./asserts/info)
++else
++    fmts=$(cat ./data/asserts.info)
++fi
+ 
+ cat <<EOF > "$PKG_BUILDDIR/data/info"
+ VERSION=$v

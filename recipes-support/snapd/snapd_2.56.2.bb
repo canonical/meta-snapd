@@ -1,40 +1,27 @@
 SUMMARY = "The snapd and snap tools enable systems to work with .snap files."
 HOMEPAGE = "https://www.snapcraft.io"
-LICENSE = "GPL-3.0"
+LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/${PN}-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-SRC_URI = "									\
+SRC_URI = "	\
 	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
+  file://0001-mkversion-data-generate-supported-assert-formats-inf.patch \
 "
 
-SRC_URI[md5sum] = "0869cf83542632cef3ad721058db890a"
-SRC_URI[sha256sum] = "1e8c9e7c37cb4099d7bc0e877362d4bef2cf8383e56e7431970b99b23a726493"
+SRC_URI[md5sum] = "5952bd537b14f74aa2c33ecba84e9d9a"
+SRC_URI[sha256sum] = "ee4096ef1a74a8d29b4cb7f43d442244beec413c21a517f34476270eb6a59fed"
 
 PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}"
 PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmor"
 
 GO_IMPORT = "github.com/snapcore/snapd"
 
-SHARED_GO_INSTALL = "				\
-	${GO_IMPORT}/cmd/snap		\
-	${GO_IMPORT}/cmd/snapd		\
-	${GO_IMPORT}/cmd/snap-seccomp	\
-	${GO_IMPORT}/cmd/snap-failure	\
-	"
-
-STATIC_GO_INSTALL = " \
-	${GO_IMPORT}/cmd/snap-exec		\
-	${GO_IMPORT}/cmd/snap-update-ns		\
-	${GO_IMPORT}/cmd/snapctl		\
-"
-
-GO_INSTALL = "${SHARED_GO_INSTALL}"
-
 DEPENDS += "			\
 	glib-2.0		\
 	udev			\
 	xfsprogs		\
 	libseccomp      \
+	${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}	\
 "
 
 RDEPENDS:${PN} += "		\
@@ -66,9 +53,8 @@ AUTOTOOLS_SCRIPT_PATH = "${S}/cmd"
 
 SYSTEMD_SERVICE:${PN} = "snapd.service"
 
-do_configure:prepend() {
-	(cd ${S} ; ./mkversion.sh ${PV})
-}
+GO_BUILD_TAGS_snapd = "nosecboot"
+GO_BUILD_TAGS = "nosecboot nomanagers"
 
 # The go class does export a do_configure function, of which we need
 # to change the symlink set-up, to target snapd's environment.
@@ -76,21 +62,28 @@ do_configure() {
 	mkdir -p ${S}/src/github.com/snapcore
 	ln -snf ${S} ${S}/src/${GO_IMPORT}
 	go_do_configure
+	# internally calls go run to generate some assets
+	(cd ${S} ; GOARCH=${GOHOSTARCH} sh -x ./mkversion.sh ${PV})
 	autotools_do_configure
 }
 
 do_compile() {
-	export GO111MODULE=off
-	go_do_compile
-	# these *must* be built statically
-	for prog in ${STATIC_GO_INSTALL}; do
-		${GO} install -v \
-		        -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
-		        $prog
-	done
+	(
+		cd ${S}
+		${GO} install -tags '${GO_BUILD_TAGS_snapd}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snapd
+		${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap
+		${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap-seccomp
+		${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap-failure
 
-  # build the rest
-  autotools_do_compile
+		# these *must* be built statically
+		for prog in snap-exec snap-update-ns snapctl; do
+			${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor -v \
+			      -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
+			      github.com/snapcore/snapd/cmd/$prog
+		done
+	)
+	# build the rest
+	autotools_do_compile
 }
 
 do_install() {
@@ -140,11 +133,13 @@ do_install() {
 	rm -fv ${D}${systemd_unitdir}/system/snapd.system-shutdown.service
 	rm -fv ${D}${systemd_unitdir}/system/snapd.snap-repair.*
 	rm -fv ${D}${systemd_unitdir}/system/snapd.core-fixup.*
-	# and related scripts
+	rm -fv ${D}${systemd_unitdir}/snapd.recovery-chooser-trigger.service
+	# and related scripts and binaries
 	rm -fv ${D}${libdir}/snapd/snapd.core-fixup.sh
+	rm -fv ${D}${libdir}/snapd/system-shutdown
 }
 
-RDEPENDS:{PN} += "squashfs-tools"
+RDEPENDS:${PN} += "squashfs-tools"
 FILES:${PN} += "                                    \
 	${systemd_unitdir}/system/                        \
 	${systemd_unitdir}/system-generators/             \
