@@ -14,7 +14,6 @@ PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmo
 GO_IMPORT = "github.com/snapcore/snapd"
 
 DEPENDS += " \
-	${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}	\
 	glib-2.0		\
 	libcap			\
 	libseccomp		\
