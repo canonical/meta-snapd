@@ -20,6 +20,7 @@ DEPENDS += "			\
 	glib-2.0		\
 	udev			\
 	xfsprogs		\
+	libcap			\
 	libseccomp      \
 	${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}	\
 "
