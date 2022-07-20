@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/${PN}-${PV}/COPYING;md5=d32239bcb673463ab8
 
 SRC_URI = "	\
 	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
-  file://0001-mkversion-data-generate-supported-assert-formats-inf.patch \
+	file://0001-mkversion-data-generate-supported-assert-formats-inf.patch \
 "
 
 SRC_URI[md5sum] = "5952bd537b14f74aa2c33ecba84e9d9a"
@@ -16,19 +16,20 @@ PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmo
 
 GO_IMPORT = "github.com/snapcore/snapd"
 
-DEPENDS += "			\
+DEPENDS += " \
+	${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}	\
 	glib-2.0		\
+	libcap			\
+	libseccomp		\
 	udev			\
 	xfsprogs		\
-	libcap			\
-	libseccomp      \
-	${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}	\
 "
 
 RDEPENDS_${PN} += "		\
+	bash			\
 	ca-certificates		\
 	kernel-module-squashfs	\
-	bash \
+	squashfs-tools		\
 "
 
 S = "${WORKDIR}/${PN}-${PV}"
@@ -140,7 +141,6 @@ do_install() {
 	rm -fv ${D}${libdir}/snapd/system-shutdown
 }
 
-RDEPENDS_${PN} += "squashfs-tools"
 FILES_${PN} += "                                    \
 	${systemd_unitdir}/system/                        \
 	${systemd_unitdir}/system-generators/             \
