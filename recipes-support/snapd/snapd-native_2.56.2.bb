@@ -43,7 +43,10 @@ do_configure() {
 
 do_compile() {
 	# only build the snap tool
-	${GO} install -tags 'nosecboot nomanagers' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap
+	(
+		cd ${S}
+		${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap
+	)
 }
 
 do_install() {
