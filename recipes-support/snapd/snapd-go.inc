@@ -12,8 +12,14 @@ GO_DYNLINK_aarch64 = ""
 # modules are vendored in the release tarball
 GOBUILDFLAGS_append = " -mod=vendor"
 
+# tags to disable unnecessary functionality:
+# nosecboot  - disable secboot support, only useful for Ubuntu Core
+# nomanagers - disable the managers code which could have been be imported but
+#              isn't useful in binaries that aren't actual snapd daemon binary
 GO_BUILD_TAGS_snapd = "nosecboot"
 GO_BUILD_TAGS = "nosecboot nomanagers"
+# GO_BUILD_TAGS is expanded by bitbake, but must be a single string when passed
+# to go build -tags, hence it's single quoted where needed
 
 # The go class does export a do_configure function, of which we need
 # to change the symlink set-up, to target snapd's environment.
