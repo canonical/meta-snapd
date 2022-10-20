@@ -41,7 +41,9 @@ require snapd-go.inc
 # and we need to tell the autotools class to look in there.
 AUTOTOOLS_SCRIPT_PATH = "${S}/cmd"
 
-SYSTEMD_SERVICE_${PN} = "snapd.service"
+SYSTEMD_SERVICE_${PN} = "snapd.service \
+	${@bb.utils.contains('PACKAGECONFIG', 'apparmor', 'snapd.apparmor.service', '', d)} \
+"
 
 do_configure() {
 	snapd_go_do_configure
