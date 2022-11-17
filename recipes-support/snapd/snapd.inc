@@ -99,7 +99,8 @@ do_install() {
 	rm -fv ${D}${systemd_unitdir}/system/snapd.system-shutdown.service
 	rm -fv ${D}${systemd_unitdir}/system/snapd.snap-repair.*
 	rm -fv ${D}${systemd_unitdir}/system/snapd.core-fixup.*
-	rm -fv ${D}${systemd_unitdir}/snapd.recovery-chooser-trigger.service
+	rm -fv ${D}${systemd_unitdir}/system/snapd.recovery-chooser-trigger.service
+	rm -fv ${D}${systemd_unitdir}/system/snapd.aa-prompt-listener.service
 	# and related scripts and binaries
 	rm -fv ${D}${libdir}/snapd/snapd.core-fixup.sh
 	rm -fv ${D}${libdir}/snapd/system-shutdown

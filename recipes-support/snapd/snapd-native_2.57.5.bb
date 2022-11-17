@@ -9,8 +9,8 @@ SRC_URI = "									\
 	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
 "
 
-SRC_URI[md5sum] = "5952bd537b14f74aa2c33ecba84e9d9a"
-SRC_URI[sha256sum] = "ee4096ef1a74a8d29b4cb7f43d442244beec413c21a517f34476270eb6a59fed"
+SRC_URI[md5sum] = "722be543c98df28ab04df1ade4ab8d38"
+SRC_URI[sha256sum] = "22873493d9cd389b7d33775f3af22d663a749ecf53c4b93c03fd880350ee612d"
 
 RDEPENDS_${PN} += "		\
 	ca-certificates		\
