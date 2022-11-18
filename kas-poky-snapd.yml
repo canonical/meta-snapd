@@ -12,7 +12,7 @@ repos:
   poky:
     url: https://git.yoctoproject.org/git/poky
     path: layers/poky
-    refspec: master
+    refspec: kirkstone
     layers:
       meta:
       meta-poky:
@@ -21,7 +21,7 @@ repos:
   meta-openembedded:
     url: http://git.openembedded.org/meta-openembedded
     path: layers/meta-openembedded
-    refspec: master
+    refspec: kirkstone
     layers:
       meta-oe:
       meta-python:
@@ -32,7 +32,7 @@ repos:
   meta-security:
     url: http://git.yoctoproject.org/git/meta-security
     path: layers/meta-security
-    refspec: master
+    refspec: kirkstone
 
 bblayers_conf_header:
   standard: |
@@ -71,6 +71,8 @@ local_conf_header:
                packagegroup-snapd \
                bash \
                "
+    # TODO patches only apply cleanly on 5.10
+    PREFERRED_VERSION_linux-yocto = "5.10%"
   image-tweaks: |
     # some room for installing snaps
     IMAGE_ROOTFS_EXTRA_SPACE = "512000"
