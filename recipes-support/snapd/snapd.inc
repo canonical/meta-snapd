@@ -1,47 +1,29 @@
 SUMMARY = "The snapd and snap tools enable systems to work with .snap files."
 HOMEPAGE = "https://www.snapcraft.io"
-LICENSE = "GPL-3.0"
+LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/${PN}-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-SRC_URI = "									\
+SRC_URI = "	\
 	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
+	file://0001-mkversion-data-generate-supported-assert-formats-inf.patch \
 "
-
-SRC_URI[md5sum] = "5952bd537b14f74aa2c33ecba84e9d9a"
-SRC_URI[sha256sum] = "ee4096ef1a74a8d29b4cb7f43d442244beec413c21a517f34476270eb6a59fed"
 
 PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}"
 PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmor"
 
-GO_IMPORT = "github.com/snapcore/snapd"
-
-SHARED_GO_INSTALL = "				\
-	${GO_IMPORT}/cmd/snap		\
-	${GO_IMPORT}/cmd/snapd		\
-	${GO_IMPORT}/cmd/snap-seccomp	\
-	${GO_IMPORT}/cmd/snap-failure	\
-	"
-
-STATIC_GO_INSTALL = " \
-	${GO_IMPORT}/cmd/snap-exec		\
-	${GO_IMPORT}/cmd/snap-update-ns		\
-	${GO_IMPORT}/cmd/snapctl		\
-"
-
-GO_INSTALL = "${SHARED_GO_INSTALL}"
-
-DEPENDS += "			\
+DEPENDS += " \
 	glib-2.0		\
+	libcap			\
+	libseccomp		\
 	udev			\
 	xfsprogs		\
-	libseccomp      \
-	${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}	\
 "
 
-RDEPENDS_${PN} += "		\
+RDEPENDS_${PN} += " \
+	bash			\
 	ca-certificates		\
 	kernel-module-squashfs	\
-	bash \
+	squashfs-tools		\
 "
 
 S = "${WORKDIR}/${PN}-${PV}"
@@ -51,44 +33,30 @@ EXTRA_OECONF += "			\
 	--with-snap-mount-dir=/snap \
 "
 
-inherit systemd autotools pkgconfig go
+inherit systemd autotools pkgconfig
 
-# disable shared runtime for x86
-# https://forum.snapcraft.io/t/yocto-rocko-core-snap-panic/3261
-# GO_DYNLINK is set with arch overrides in goarch.bbclass
-GO_DYNLINK_x86 = ""
-GO_DYNLINK_x86-64 = ""
-GO_DYNLINK_arm = ""
-GO_DYNLINK_aarch64 = ""
+require snapd-go.inc
 
 # Our tools build with autotools are inside the cmd subdirectory
 # and we need to tell the autotools class to look in there.
 AUTOTOOLS_SCRIPT_PATH = "${S}/cmd"
 
-SYSTEMD_SERVICE_${PN} = "snapd.service"
+SYSTEMD_SERVICE_${PN} = "snapd.service \
+	${@bb.utils.contains('PACKAGECONFIG', 'apparmor', 'snapd.apparmor.service', '', d)} \
+"
 
-# The go class does export a do_configure function, of which we need
-# to change the symlink set-up, to target snapd's environment.
 do_configure() {
-	mkdir -p ${S}/src/github.com/snapcore
-	ln -snf ${S} ${S}/src/${GO_IMPORT}
-	go_do_configure
-	# internally calls go run to generate some assets
-	(cd ${S} ; GOARCH=${GOHOSTARCH} sh -x ./mkversion.sh ${PV})
+	snapd_go_do_configure
 	autotools_do_configure
 }
 
 do_compile() {
-	go_do_compile
-	# these *must* be built statically
-	for prog in ${STATIC_GO_INSTALL}; do
-		${GO} install -v \
-		        -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
-		        $prog
-	done
-
-  # build the rest
-  autotools_do_compile
+	snapd_go_do_compile
+	# build the rest
+	(
+		cd ${B}
+		autotools_do_compile
+	)
 }
 
 do_install() {
@@ -121,14 +89,7 @@ do_install() {
 	   ${D}${systemd_unitdir}
 	rm -rf ${D}${prefix}${systemd_unitdir}
 
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snapd ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap-exec ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap-seccomp ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap-update-ns ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snapctl ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap-failure ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap ${D}${bindir}
-	ln -s ${libdir}/snapd/snapctl ${D}${bindir}/snapctl
+	snapd_go_install
 
 	echo "PATH=\$PATH:/snap/bin" > ${D}${sysconfdir}/profile.d/20-snap.sh
 
@@ -138,13 +99,13 @@ do_install() {
 	rm -fv ${D}${systemd_unitdir}/system/snapd.system-shutdown.service
 	rm -fv ${D}${systemd_unitdir}/system/snapd.snap-repair.*
 	rm -fv ${D}${systemd_unitdir}/system/snapd.core-fixup.*
-	rm -fv ${D}${systemd_unitdir}/snapd.recovery-chooser-trigger.service
+	rm -fv ${D}${systemd_unitdir}/system/snapd.recovery-chooser-trigger.service
+	rm -fv ${D}${systemd_unitdir}/system/snapd.aa-prompt-listener.service
 	# and related scripts and binaries
 	rm -fv ${D}${libdir}/snapd/snapd.core-fixup.sh
 	rm -fv ${D}${libdir}/snapd/system-shutdown
 }
 
-RDEPENDS_${PN} += "squashfs-tools"
 FILES_${PN} += "                                    \
 	${systemd_unitdir}/system/                        \
 	${systemd_unitdir}/system-generators/             \
