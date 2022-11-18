@@ -12,7 +12,7 @@ repos:
   poky:
     url: https://git.yoctoproject.org/git/poky
     path: layers/poky
-    refspec: master
+    refspec: dunfell
     layers:
       meta:
       meta-poky:
@@ -21,7 +21,7 @@ repos:
   meta-openembedded:
     url: http://git.openembedded.org/meta-openembedded
     path: layers/meta-openembedded
-    refspec: master
+    refspec: dunfell
     layers:
       meta-oe:
       meta-python:
@@ -32,7 +32,7 @@ repos:
   meta-security:
     url: http://git.yoctoproject.org/git/meta-security
     path: layers/meta-security
-    refspec: master
+    refspec: dunfell
 
 bblayers_conf_header:
   standard: |
@@ -43,7 +43,7 @@ local_conf_header:
   reduce_diskspace: |
     INHERIT += "rm_work"
   standard: |
-    CONF_VERSION = "2"
+    CONF_VERSION = "1"
     PACKAGE_CLASSES = "package_ipk"
     SDKMACHINE = "x86_64"
     USER_CLASSES = "buildstats"
@@ -51,7 +51,7 @@ local_conf_header:
   debug-tweaks: |
     EXTRA_IMAGE_FEATURES = "debug-tweaks"
   distro: |
-    DISTRO_FEATURES:append = " systemd apparmor security"
+    DISTRO_FEATURES_append = " systemd apparmor security"
   systemd: |
     VIRTUAL-RUNTIME_init_manager = "systemd"
     DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
