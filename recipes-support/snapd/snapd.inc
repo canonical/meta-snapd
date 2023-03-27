@@ -73,7 +73,7 @@ do_install() {
 	install -d ${D}${systemd_unitdir}/system-generators
 
 	oe_runmake -C ${B} install DESTDIR=${D}
-	oe_runmake -C ${S}/data/systemd install \
+	oe_runmake -C ${S}/data install \
 		DESTDIR=${D} \
 		BINDIR=${bindir} \
 		LIBEXECDIR=${libdir} \
@@ -104,13 +104,21 @@ do_install() {
 	# and related scripts and binaries
 	rm -fv ${D}${libdir}/snapd/snapd.core-fixup.sh
 	rm -fv ${D}${libdir}/snapd/system-shutdown
+
+	# drop fish completion files
+	rm -rfv ${D}${datadir}/fish
+
+	# drop desktop files
+	rm -rfv ${D}${datadir}/applications
 }
 
 FILES:${PN} += "                                    \
 	${systemd_unitdir}/system/                        \
 	${systemd_unitdir}/system-generators/             \
 	${systemd_unitdir}/system-environment-generators/	\
+	${nonarch_libdir}/tmpfiles.d/                     \
+	${nonarch_libdir}/environment.d/                  \
+	${datadir}/dbus-1/                                \
 	/var/lib/snapd                                    \
 	/var/snap                                         \
-	${baselib}/udev/snappy-app-dev                    \
 "
