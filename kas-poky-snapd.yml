@@ -42,6 +42,7 @@ bblayers_conf_header:
 local_conf_header:
   reduce_diskspace: |
     INHERIT += "rm_work"
+    RM_WORK_EXCLUDE += "snapd"
   standard: |
     CONF_VERSION = "2"
     PACKAGE_CLASSES = "package_ipk"
