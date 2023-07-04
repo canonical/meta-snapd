@@ -30,7 +30,7 @@ S = "${WORKDIR}/${PN}-${PV}"
 
 EXTRA_OECONF += "			\
 	--libexecdir=${libdir}/snapd	\
-	--with-snap-mount-dir=/snap \
+	--with-snap-mount-dir=/snap     \
 "
 
 inherit systemd autotools pkgconfig
@@ -112,10 +112,10 @@ do_install() {
 	rm -rfv ${D}${datadir}/applications
 }
 
-FILES:${PN} += "                                    \
+FILES:${PN} += "                                          \
 	${systemd_unitdir}/system/                        \
 	${systemd_unitdir}/system-generators/             \
-	${systemd_unitdir}/system-environment-generators/	\
+	${systemd_unitdir}/system-environment-generators/ \
 	${nonarch_libdir}/tmpfiles.d/                     \
 	${nonarch_libdir}/environment.d/                  \
 	${datadir}/dbus-1/                                \
