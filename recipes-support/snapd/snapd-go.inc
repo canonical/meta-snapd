@@ -46,8 +46,8 @@ snapd_go_do_compile() {
 			${GO} install -tags '${GO_BUILD_TAGS}' -v \
 			      -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
 			      -trimpath \
-			      -mod=vendor \
-			      -modcacherw \
+			      "${@bb.utils.contains('GOBUILDFLAGS', '-mod=vendor', '-mod=vendor', '', d)}" \
+			      "${@bb.utils.contains('GOBUILDFLAGS', '-modcacherw', '-modcacherw', '', d)}" \
 			      github.com/snapcore/snapd/cmd/$prog
 		done
 	)
