@@ -135,7 +135,7 @@ RM_WORK_EXCLUDE += "snapd"
    command:
 
 ```
- $ runqemu qemux86
+ $ runqemu qemux86-64 nographic slirp stdioserial
 ```
 
 10. When the system has fully booted login with root and no password. Afterwards
