@@ -3,13 +3,12 @@ HOMEPAGE = "https://www.snapcraft.io"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/${PN}-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-SRC_URI = "	\
-	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
-	file://0001-mkversion-data-generate-supported-assert-formats-inf.patch \
-"
-
 PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}"
 PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmor"
+
+SRC_URI:append = " file://0001-mkversion-data-generate-supported-assert-formats-inf.patch"
+
+LIC_FILES_CHKSUM = "file://${S}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
 DEPENDS += " \
 	glib-2.0		\
@@ -25,8 +24,6 @@ RDEPENDS:${PN} += " \
 	kernel-module-squashfs	\
 	squashfs-tools		\
 "
-
-S = "${WORKDIR}/${PN}-${PV}"
 
 EXTRA_OECONF += "			\
 	--libexecdir=${libdir}/snapd	\
