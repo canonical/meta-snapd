@@ -9,7 +9,7 @@ GO_DYNLINK:x86 = ""
 GO_DYNLINK:x86-64 = ""
 GO_DYNLINK:arm = ""
 GO_DYNLINK:aarch64 = ""
-# modules are vendored in the release tarball
+# modules are vendored in the release tarball.
 GOBUILDFLAGS:append = " -mod=vendor"
 
 # tags to disable unnecessary functionality:
@@ -34,6 +34,7 @@ snapd_go_do_configure() {
 snapd_go_do_compile() {
 	(
 		cd ${S}
+		test -d vendor || ${GO} mod vendor
 		${GO} install -tags '${GO_BUILD_TAGS_snapd}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snapd
 		${GO} install -tags '${GO_BUILD_TAGS}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap
 		${GO} install -tags '${GO_BUILD_TAGS}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap-seccomp
@@ -42,10 +43,10 @@ snapd_go_do_compile() {
 
 		# these *must* be built statically
 		for prog in snap-exec snap-update-ns snapctl; do
-			${GO} install -tags '${GO_BUILD_TAGS}' -mod=vendor -v \
+			${GO} install -tags '${GO_BUILD_TAGS}' -v \
 			      -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
 			      -trimpath \
-			      -mod=vendor \
+			      -mod vendor \
 			      github.com/snapcore/snapd/cmd/$prog
 		done
 	)
