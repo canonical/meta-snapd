@@ -3,13 +3,12 @@ HOMEPAGE = "https://www.snapcraft.io"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/${PN}-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-SRC_URI = "	\
-	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
-	file://0001-mkversion-data-generate-supported-assert-formats-inf.patch \
-"
-
 PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}"
 PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmor"
+
+SRC_URI:append = " file://0001-mkversion-data-generate-supported-assert-formats-inf.patch"
+
+LIC_FILES_CHKSUM = "file://${S}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
 DEPENDS += " \
 	glib-2.0		\
@@ -26,11 +25,9 @@ RDEPENDS:${PN} += " \
 	squashfs-tools		\
 "
 
-S = "${WORKDIR}/${PN}-${PV}"
-
 EXTRA_OECONF += "			\
 	--libexecdir=${libdir}/snapd	\
-	--with-snap-mount-dir=/snap \
+	--with-snap-mount-dir=/snap     \
 "
 
 inherit systemd autotools pkgconfig
@@ -112,10 +109,10 @@ do_install() {
 	rm -rfv ${D}${datadir}/applications
 }
 
-FILES:${PN} += "                                    \
+FILES:${PN} += "                                          \
 	${systemd_unitdir}/system/                        \
 	${systemd_unitdir}/system-generators/             \
-	${systemd_unitdir}/system-environment-generators/	\
+	${systemd_unitdir}/system-environment-generators/ \
 	${nonarch_libdir}/tmpfiles.d/                     \
 	${nonarch_libdir}/environment.d/                  \
 	${datadir}/dbus-1/                                \
