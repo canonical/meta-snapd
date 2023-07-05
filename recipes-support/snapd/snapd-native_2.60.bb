@@ -5,19 +5,13 @@ HOMEPAGE = "https://www.snapcraft.io"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/snapd-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-SRC_URI = "									\
-	https://${GO_IMPORT}/releases/download/${PV}/snapd_${PV}.vendor.tar.xz	\
-"
-
-SRC_URI[md5sum] = "852110945dd61f22258ae1a80af55447"
-SRC_URI[sha256sum] = "7b8319b5ce1c2957651d0fec8c935bfbee02a1340927d9055ac1bdfdb9c1fca5"
+require snapd-2.60.inc
+S = "${WORKDIR}/snapd-${PV}"
 
 RDEPENDS_${PN} += "		\
 	ca-certificates		\
 	bash \
 "
-
-S = "${WORKDIR}/snapd-${PV}"
 
 require snapd-go.inc
 
