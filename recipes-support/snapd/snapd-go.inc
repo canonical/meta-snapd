@@ -47,6 +47,7 @@ snapd_go_do_compile() {
 			      -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
 			      -trimpath \
 			      -mod=vendor \
+			      -modcacherw \
 			      github.com/snapcore/snapd/cmd/$prog
 		done
 	)
