@@ -7,6 +7,11 @@ Date: Tue, 27 Oct 2020 09:45:23 +0000
 Subject: [PATCH 5/5] UBUNTU: SAUCE: apparmor: rename kzfree() to
  kfree_sensitive()
 
+Upstream-Status: Inappropriate [not author]
+The patch was imported from Ubuntu Kernel git server
+(https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy) as
+of commit id e301d0f4cc619e1090e97b5eda4e005ac08c2576.
+
 Signed-off-by: Paolo Pisati <paolo.pisati@canonical.com>
 Signed-off-by: Maciek Borzecki <maciek.borzecki@gmail.com>
 ---

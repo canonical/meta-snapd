@@ -9,6 +9,11 @@ Subject: [PATCH 1/5] UBUNTU: SAUCE: apparmor: af_unix mediation
 af_socket mediation did not make it into 4.17 so add remaining out
 of tree patch
 
+Upstream-Status: Inappropriate [not author]
+The patch was imported from Ubuntu Kernel git server
+(https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy) as
+of commit id c59a2789cc146827c225f9f9035b9fc23a82fc45.
+
 Signed-off-by: John Johansen <john.johansen@canonical.com>
 Signed-off-by: Seth Forshee <seth.forshee@canonical.com>
 Signed-off-by: Maciek Borzecki <maciek.borzecki@gmail.com>
