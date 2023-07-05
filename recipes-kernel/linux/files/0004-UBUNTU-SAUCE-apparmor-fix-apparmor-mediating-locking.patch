@@ -15,6 +15,11 @@ Add the AA_MAY_LOCK perm to the computed perm mask which will grant
 permission for all current abi profiles, but still allow specifying
 auditing of the operation if needed.
 
+Upstream-Status: Inappropriate [not author]
+The patch was imported from Ubuntu Kernel git server
+(https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy) as
+of commit id d7410054784d8aa0e313f9eeb6110a791420f3d3.
+
 BugLink: http://bugs.launchpad.net/bugs/1780227
 Signed-off-by: John Johansen <john.johansen@canonical.com>
 Acked-by: Acked-by: Stefan Bader <stefan.bader@canonical.com>
