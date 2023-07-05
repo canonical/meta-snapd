@@ -14,6 +14,11 @@ This patch provides compatibility with the older rules for those
 still using an apparmor 2.x userspace and still want network rules
 to work on a newer kernel.
 
+Upstream-Status: Inappropriate [not author]
+The patch was imported from Ubuntu Kernel git server
+(https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy) as
+of commit id f153f512ed7a81e9b92a04d49869cffebf714f52.
+
 Signed-off-by: John Johansen <john.johansen@canonical.com>
 [ saf: resolve conflicts when rebasing to 4.20 ]
 Signed-off-by: Seth Forshee <seth.forshee@canonical.com>
