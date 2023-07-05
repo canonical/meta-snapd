@@ -2,10 +2,10 @@ PR = "r0"
 
 SRC_URI = "git://github.com/snapcore/snapd.git;protocol=https;branch=release/2.58;destsuffix=git/"
 
-PV = "2.58.3+git${SRCPV}"
+PV = "2.60+git${SRCPV}"
 S = "${WORKDIR}/git"
 
-SRCREV = "6c067a778203ac0696084bf2b42bbf46ef35706a"
+SRCREV = "87725a5df4574605c6acc90a4dcedab87d760e6b"
 
 DEFAULT_PREFERENCE ??= "-1"
 
