@@ -16,6 +16,7 @@ DEPENDS += " \
 	libseccomp		\
 	udev			\
 	xfsprogs		\
+	autoconf-archive	\
 "
 
 RDEPENDS:${PN} += " \
