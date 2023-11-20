@@ -5,7 +5,7 @@ HOMEPAGE = "https://www.snapcraft.io"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/snapd-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-require snapd-2.60.inc
+require snapd-2.61.inc
 S = "${WORKDIR}/snapd-${PV}"
 
 RDEPENDS_${PN} += "		\
