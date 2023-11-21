@@ -3,7 +3,7 @@ From: Simon Fels <simon.fels@canonical.com>
 Date: Fri, 24 Mar 2017 17:54:48 +0100
 Subject: [PATCH 1/4] packaging: use templates for relevant systemd units
 
-To make packaging across different distributionis a bit easier we
+To make packaging across different distributions a bit easier we
 now use templates for some of our systemd units and replace things
 which are in a different location with sed at build time.
 ---
