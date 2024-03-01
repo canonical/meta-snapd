@@ -9,16 +9,16 @@ required for supporting snaps in your system:
 
  * snapd
 
-The layer currently supports Yocto 3.1.x Dunfell release.
+The layer currently supports Yocto Kirkstone release.
 
 The following layers are required:
 
  - meta-openembedded/meta-oe
+ - meta-openembedded/meta-networking
+ - meta-openembedded/meta-perl
+ - meta-openembedded/meta-pythoin
  - meta-openembedded/meta-filesystems
- - meta-security (libseccomp & apparmor)
-
-Note that those layers may depend on additional layers you will need to add.
-
+ - meta-security
 
 # Try it!
 
@@ -30,7 +30,7 @@ Note that those layers may depend on additional layers you will need to add.
 ```
  $ git clone git://git.yoctoproject.org/poky
  $ cd poky
- $ git checkout dunfell
+ $ git checkout kirkstone
 ```
 
 3. Fetch meta-openembedded layer:
@@ -38,7 +38,7 @@ Note that those layers may depend on additional layers you will need to add.
 ```
  $ git clone git://git.openembedded.org/meta-openembedded
  $ cd meta-openembedded
- $ git checkout dunfell
+ $ git checkout kirkstone
 ```
 
 3. Fetch meta-security layer:
@@ -46,13 +46,15 @@ Note that those layers may depend on additional layers you will need to add.
 ```
  $ git clone git://git.yoctoproject.org/meta-security
  $ cd meta-security
- $ git checkout dunfell
+ $ git checkout kirkstone
 ```
 
 5. Fetch meta-snapd layer
 
 ```
  $ git clone https://github.com/snapcore/meta-snapd.git
+ $ cd meta-snapd
+ $ git checkout kirkstone
 ```
 
 6. Prepare the build environment
@@ -68,6 +70,9 @@ Note that those layers may depend on additional layers you will need to add.
    ...
    /tmp/poky/meta-snapd \
    /tmp/meta-openembedded/meta-oe \
+   /tmp/meta-openembedded/meta-networking \
+   /tmp/meta-openembedded/meta-perl \
+   /tmp/meta-openembedded/meta-python \
    /tmp/meta-openembedded/meta-filesystems \
    /tmp/meta-openembedded/meta-security \
   "
@@ -81,10 +86,8 @@ Note that those layers may depend on additional layers you will need to add.
 
 ```
 cat <<EOF >> conf/local.conf
-DISTRO_FEATURES_append = " systemd"
-VIRTUAL-RUNTIME_init_manager = "systemd"
-DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
-VIRTUAL-RUNTIME_initscripts = ""
+DISTRO_FEATURES:append = " systemd security"
+INIT_MANAGER = "systemd"
 EOF
 ```
 
@@ -92,7 +95,7 @@ Optionally enable AppArmor support:
 
 ```
 cat <<EOF >> conf/local.conf
-DISTRO_FEATURES_append = " apparmor"
+DISTRO_FEATURES:append = " apparmor"
 EOF
 ```
 
