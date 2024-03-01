@@ -9,7 +9,7 @@ required for supporting snaps in your system:
 
  * snapd
 
-The layer currently supports Yocto Kirkstone release.
+The layer follows Yocto master branch.
 
 The following layers are required:
 
@@ -30,31 +30,24 @@ The following layers are required:
 ```
  $ git clone git://git.yoctoproject.org/poky
  $ cd poky
- $ git checkout kirkstone
 ```
 
 3. Fetch meta-openembedded layer:
 
 ```
  $ git clone git://git.openembedded.org/meta-openembedded
- $ cd meta-openembedded
- $ git checkout kirkstone
 ```
 
 3. Fetch meta-security layer:
 
 ```
  $ git clone git://git.yoctoproject.org/meta-security
- $ cd meta-security
- $ git checkout kirkstone
 ```
 
 5. Fetch meta-snapd layer
 
 ```
  $ git clone https://github.com/snapcore/meta-snapd.git
- $ cd meta-snapd
- $ git checkout kirkstone
 ```
 
 6. Prepare the build environment
