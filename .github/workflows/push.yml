@@ -1,0 +1,61 @@
+name: Reference build
+on:
+  push:
+    branches: ["master", "kirkstone"]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        kas:
+          - kas-poky-snapd.aarch64.yml
+          - kas-poky-snapd.x86_64.yml
+    # TODO: use large runners when available
+    runs-on: [self-hosted, Linux]
+    timeout-minutes: 240
+    name: ${{ matrix.kas }}
+    env:
+      # On non-ephemeral workers, downloads and sstate is cached.
+      DL_DIR: /srv/meta-snapd/master/downloads
+      SSTATE_DIR: /srv/meta-snapd/master/sstate-cache
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo -E DEBIAN_FRONTEND=noninteractive apt install -y kas chrpath diffstat bzip2 cpp g++ gcc lz4 make rpcsvc-proto
+          kas --version
+      - name: Setup DL_DIR and SSTATE_DIR
+        run: |
+          sudo mkdir -p "$DL_DIR"
+          sudo mkdir -p "$SSTATE_DIR"
+          sudo chown $(id -u).$(id -g) "$DL_DIR" "$SSTATE_DIR"
+          # This hack makes DL_DIR and SSTATE_DIR overrides compatible with kas 2.6.3 in Ubuntu 22.04
+          mkdir -p build/conf
+          printf 'DL_DIR = "%s"\n' "$DL_DIR" >build/conf/auto.conf
+          printf 'SSTATE_DIR = "%s"\n' "$SSTATE_DIR" >> build/conf/auto.conf
+      - name: Use tmpfs for TMPDIR
+        run: |
+          mkdir -p build/tmp
+          if [ "$(LANG=C free --total --giga | awk -e '/Total/ { print $2 }')" -gt 64 ]; then
+            sudo mount -o size=64G -t tmpfs none build/tmp
+          fi
+      - name: Run kas checkout
+        run: |
+          kas checkout ${{ matrix.kas }}
+      - name: Run kas build
+        run: |
+          kas build kas-poky-snapd.yml --target snapd-demo-image
+      - uses: actions/upload-artifact@v4
+        with:
+          name: image-${{ matrix.kas }}
+          path: build/tmp/deploy/images
+          if-no-files-found: warn
+          retention-days: 1
+          compression-level: 0
+      - name: Unmount tmpfs
+        if: always()
+        run: |
+          # Lazy umount as apparently something may be using this still?
+          sudo umount -l build/tmp || true
