@@ -52,7 +52,7 @@ local_conf_header:
   debug-tweaks: |
     EXTRA_IMAGE_FEATURES = "debug-tweaks"
   distro: |
-    DISTRO_FEATURES:append = " systemd apparmor security"
+    DISTRO_FEATURES:append = " systemd apparmor security usrmerge"
   systemd: |
     VIRTUAL-RUNTIME_init_manager = "systemd"
     DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
