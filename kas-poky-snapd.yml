@@ -4,7 +4,7 @@ header:
 machine: qemux86-64
 distro: poky
 target:
-  - core-image-minimal
+  - snapd
 
 repos:
   meta-snapd:
