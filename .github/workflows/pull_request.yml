@@ -47,7 +47,7 @@ jobs:
           kas checkout ${{ matrix.kas }}
       - name: Run kas build
         run: |
-          kas build kas-poky-snapd.yml --target snapd-demo-image
+          kas build ${{ matrix.kas }} --target snapd-demo-image
       - name: Unmount tmpfs
         if: always()
         run: |
