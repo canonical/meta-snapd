@@ -10,6 +10,7 @@ jobs:
         kas:
           - kas-poky-snapd.aarch64.yml
           - kas-poky-snapd.x86_64.yml
+          - kas-poky-snapd.riscv64.yml
     # TODO: use large runners when available
     runs-on: [self-hosted, Linux]
     timeout-minutes: 240
