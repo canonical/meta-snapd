@@ -22,8 +22,13 @@ DEPENDS += " \
 RDEPENDS:${PN} += " \
 	bash			\
 	ca-certificates		\
-	kernel-module-squashfs	\
 	squashfs-tools		\
+"
+
+# We require squashfs in the kernel but derivatives may not carry this specific
+# package so make it poky-specific.
+RDEPENDS:${PN}:append:poky = "  \
+  kernel-module-squashfs  \
 "
 
 EXTRA_OECONF += "			\
