@@ -1,7 +1,7 @@
 name: Smoke build
 on:
   pull_request:
-    branches: ["master", "kirkstone"]
+    branches: ["master", "nanbield"]
 
 jobs:
   build:
@@ -17,8 +17,8 @@ jobs:
     name: ${{ matrix.kas }}
     env:
       # On non-ephemeral workers, downloads and sstate is cached.
-      DL_DIR: /srv/meta-snapd/master/downloads
-      SSTATE_DIR: /srv/meta-snapd/master/sstate-cache
+      DL_DIR: /srv/meta-snapd/nanbield/downloads
+      SSTATE_DIR: /srv/meta-snapd/nanbield/sstate-cache
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
