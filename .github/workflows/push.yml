@@ -1,7 +1,7 @@
 name: Reference build
 on:
   push:
-    branches: ["master", "kirkstone"]
+    branches: ["master", "scarthgap"]
 
 jobs:
   build:

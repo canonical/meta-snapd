@@ -1,7 +1,7 @@
 name: Smoke build
 on:
   pull_request:
-    branches: ["master", "kirkstone"]
+    branches: ["master", "scarthgap"]
 
 jobs:
   build:
