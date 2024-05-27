@@ -17,8 +17,8 @@ jobs:
     name: ${{ matrix.kas }}
     env:
       # On non-ephemeral workers, downloads and sstate is cached.
-      DL_DIR: /srv/meta-snapd/master/downloads
-      SSTATE_DIR: /srv/meta-snapd/master/sstate-cache
+      DL_DIR: /srv/meta-snapd/scarthgap/downloads
+      SSTATE_DIR: /srv/meta-snapd/scarthgap/sstate-cache
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
