@@ -11,7 +11,7 @@ repos:
   poky:
     url: https://git.yoctoproject.org/git/poky
     path: layers/poky
-    refspec: master
+    branch: scarthgap
     layers:
       meta:
       meta-poky:
@@ -20,7 +20,7 @@ repos:
   meta-openembedded:
     url: http://git.openembedded.org/meta-openembedded
     path: layers/meta-openembedded
-    refspec: master
+    branch: scarthgap
     layers:
       meta-oe:
       meta-python:
@@ -31,7 +31,7 @@ repos:
   meta-security:
     url: http://git.yoctoproject.org/git/meta-security
     path: layers/meta-security
-    refspec: master
+    branch: scarthgap
 
 bblayers_conf_header:
   standard: |
