@@ -67,6 +67,7 @@ do_install() {
 	install -d ${D}${bindir}
 	install -d ${D}${systemd_unitdir}/system
 	install -d ${D}/var/lib/snapd
+	install -d ${D}/var/lib/snapd/cgroup
 	install -d ${D}/var/lib/snapd/snaps
 	install -d ${D}/var/lib/snapd/lib/gl
 	install -d ${D}/var/lib/snapd/desktop
