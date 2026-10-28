@@ -1,12 +1,9 @@
 SUMMARY = "The snapd and snap tools enable systems to work with .snap files."
 HOMEPAGE = "https://www.snapcraft.io"
 LICENSE = "GPL-3.0-only"
-LIC_FILES_CHKSUM = "file://${WORKDIR}/${PN}-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
 PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'apparmor', 'apparmor', '', d)}"
 PACKAGECONFIG[apparmor] = "--enable-apparmor,--disable-apparmor,apparmor,apparmor"
-
-SRC_URI:append = " file://0001-mkversion-data-generate-supported-assert-formats-inf.patch"
 
 LIC_FILES_CHKSUM = "file://${S}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
@@ -22,6 +19,8 @@ DEPENDS += " \
 RDEPENDS:${PN} += " \
 	bash			\
 	ca-certificates		\
+	findutils		\
+	libcap-bin		\
 	squashfs-tools		\
 "
 
@@ -45,6 +44,8 @@ require snapd-go.inc
 AUTOTOOLS_SCRIPT_PATH = "${S}/cmd"
 
 SYSTEMD_SERVICE:${PN} = "snapd.service \
+	snapd.socket \
+	snapd.seeded.service \
 	${@bb.utils.contains('PACKAGECONFIG', 'apparmor', 'snapd.apparmor.service', '', d)} \
 "
 
@@ -73,6 +74,10 @@ do_install() {
 	install -d ${D}/var/lib/snapd/desktop
 	install -d ${D}/var/lib/snapd/environment
 	install -d ${D}/var/snap
+	# snapd probes for /snap at runtime; without it, it assumes an unknown
+	# distro and uses /var/lib/snapd/snap, which snap-confine was not
+	# configured for (see snapMountDirProbe in dirs/dirs.go)
+	install -d ${D}/snap/bin
 	install -d ${D}${sysconfdir}/profile.d
 	install -d ${D}${systemd_unitdir}/system-generators
 
@@ -116,6 +121,9 @@ do_install() {
 
 	# drop desktop files
 	rm -rfv ${D}${datadir}/applications
+
+	# dracut config is only used by the Ubuntu Core initramfs
+	rm -rfv ${D}${nonarch_libdir}/dracut
 }
 
 FILES:${PN} += "                                          \
@@ -125,6 +133,17 @@ FILES:${PN} += "                                          \
 	${nonarch_libdir}/tmpfiles.d/                     \
 	${nonarch_libdir}/environment.d/                  \
 	${datadir}/dbus-1/                                \
+	${datadir}/polkit-1/                              \
 	/var/lib/snapd                                    \
 	/var/snap                                         \
+	/snap                                             \
 "
+
+# snap-confine is not setuid root: it expects file capabilities and keeps
+# euid 0 if setuid, which breaks it for regular users. Package formats do not
+# reliably carry the security.capability xattr, so set it at install time.
+# The cgroup v2 set is enough; LuneOS runs systemd on the unified hierarchy.
+PACKAGE_WRITE_DEPS += "libcap-native"
+pkg_postinst:${PN}() {
+	setcap "$(cat $D${libdir}/snapd/snap-confine.v2-only.caps)" $D${libdir}/snapd/snap-confine
+}

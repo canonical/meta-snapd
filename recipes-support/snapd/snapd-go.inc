@@ -27,22 +27,24 @@ snapd_go_do_configure() {
 	mkdir -p ${S}/src/github.com/snapcore
 	ln -snf ${S} ${S}/src/${GO_IMPORT}
 	go_do_configure
-	# internally calls go run to generate some assets
-	(cd ${S} ; GOARCH=${GOHOSTARCH} sh -x ./mkversion.sh ${PV})
+	# internally calls go run to generate some assets; build those helpers
+	# statically with the Go internal linker, so they run on the build host
+	# instead of getting the target's dynamic loader from the cross linker
+	(cd ${S} ; GOARCH=${GOHOSTARCH} CGO_ENABLED=0 sh -x ./mkversion.sh ${PV})
 }
 
 snapd_go_do_compile() {
 	(
 		cd ${S}
 		test -d vendor || ${GO} mod vendor "${@bb.utils.contains('GOBUILDFLAGS', '-modcacherw', '-modcacherw', '', d)}"
+		# snapd is a multi-call binary: it is also the snap CLI and
+		# snapd-apparmor, see packaging/snapd.mk
 		${GO} install -tags '${GO_BUILD_TAGS_snapd}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snapd
-		${GO} install -tags '${GO_BUILD_TAGS}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap
 		${GO} install -tags '${GO_BUILD_TAGS}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap-seccomp
-		${GO} install -tags '${GO_BUILD_TAGS}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snapd-apparmor
 		${GO} install -tags '${GO_BUILD_TAGS}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap-failure
 
-		# these *must* be built statically
-		for prog in snap-exec snap-update-ns snapctl; do
+		# these *must* be built statically; snap-exec is a symlink to snapctl
+		for prog in snap-update-ns snapctl; do
 			${GO} install -tags '${GO_BUILD_TAGS}' -v \
 			      -ldflags="${GO_RPATH} -linkmode=external -extldflags '${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} ${GO_RPATH_LINK} ${LDFLAGS} -static'" \
 			      -trimpath \
@@ -55,20 +57,21 @@ snapd_go_do_compile() {
 
 snapd_go_install() {
 	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snapd ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap-exec ${D}${libdir}/snapd/
 	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap-seccomp ${D}${libdir}/snapd/
 	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap-update-ns ${D}${libdir}/snapd/
 	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snapctl ${D}${libdir}/snapd/
 	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap-failure ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snapd-apparmor ${D}${libdir}/snapd/
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap ${D}${bindir}
+	ln -s snapctl ${D}${libdir}/snapd/snap-exec
+	# snapd-tool-wrap comes from the autotools build in cmd/
+	ln -sf snapd-tool-wrap ${D}${libdir}/snapd/snapd-apparmor
+	ln -s ${libdir}/snapd/snapd ${D}${bindir}/snap
 	ln -s ${libdir}/snapd/snapctl ${D}${bindir}/snapctl
 }
 
 snapd_go_do_compile_snap() {
-	# only build the snap tool
+	# only build the snap tool, which is the snapd multi-call binary
 	(
 		cd ${S}
-		${GO} install -tags '${GO_BUILD_TAGS}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snap
+		${GO} install -tags '${GO_BUILD_TAGS_snapd}' ${GOBUILDFLAGS} github.com/snapcore/snapd/cmd/snapd
 	)
 }

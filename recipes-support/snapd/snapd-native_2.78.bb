@@ -3,12 +3,11 @@
 SUMMARY = "The snap tool to enable building snaps and system seeds"
 HOMEPAGE = "https://www.snapcraft.io"
 LICENSE = "GPL-3.0-only"
-LIC_FILES_CHKSUM = "file://${WORKDIR}/snapd-${PV}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
+LIC_FILES_CHKSUM = "file://${S}/COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-require snapd-2.63.inc
-S = "${WORKDIR}/snapd-${PV}"
+require snapd-2.78.inc
 
-RDEPENDS_${PN} += "		\
+RDEPENDS:${PN} += "		\
 	ca-certificates		\
 	bash \
 "
@@ -27,7 +26,9 @@ do_compile() {
 
 do_install() {
 	install -d ${D}${bindir}
-	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snap ${D}${bindir}
+	install -m 0755 ${B}/${GO_BUILD_BINDIR}/snapd ${D}${bindir}
+	# acts as the snap CLI when invoked as snap
+	ln -s snapd ${D}${bindir}/snap
 }
 
 RDEPENDS:${PN} += "squashfs-tools"
